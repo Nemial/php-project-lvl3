@@ -1,0 +1,16 @@
+{
+    "name": "nemial/page-analyzer",
+    "description": "Web site for page analysis",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "nemial",
+            "email": "nemtre@protonmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "laravel/laravel": "7.12.0"
+    }
+}
