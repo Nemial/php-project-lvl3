@@ -1,5 +1,5 @@
 
-name: GenDiff
+name: Page Analyzer
 
 on:
   push:
