@@ -1,4 +1,4 @@
 lint:
-	composer phpcs -- --standard=PSR12 public tests
+	composer phpcs -- --standard=PSR12 tests
 deploy:
 	git push heroku
