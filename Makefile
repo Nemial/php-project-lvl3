@@ -7,4 +7,4 @@ deploy:
 log:
 	tail -f storage/logs/laravel.log
 start:
-	php artisan serve --host 0.0.0.0
+	php artisan serve --host localhost
