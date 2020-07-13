@@ -26,10 +26,10 @@ jobs:
       - name: Setup PostgreSQL
         uses: Harmon758/postgresql-action@v1.0.0
         with:
-        postgresql version: 10.13
-        postgresql db: domains
-        postgresql user: test
-        postgresql password: 1
+          postgresql version: 10.13
+          postgresql db: domains
+          postgresql user: test
+          postgresql password: 1
 
       - name: Laravel
         run: php artisan migrate
