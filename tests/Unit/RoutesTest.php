@@ -8,7 +8,6 @@ use Tests\TestCase;
 
 class RoutesTest extends TestCase
 {
-
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -61,5 +60,4 @@ class RoutesTest extends TestCase
         $response = $this->get(route("pages.show", ["id" => 2]));
         $response->assertOk();
     }
-
 }
