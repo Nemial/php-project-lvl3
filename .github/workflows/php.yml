@@ -34,6 +34,7 @@ jobs:
       - name: Laravel Migrate
         env:
           DB_CONNECTION: pgsql
+          DB_PORT: 5432
           DB_DATABASE: domains
           DB_USER: test
           DB_PASSWORD: 1
