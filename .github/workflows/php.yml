@@ -11,6 +11,19 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: 1
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     steps:
       - uses: actions/checkout@v2
 
@@ -23,28 +36,14 @@ jobs:
       - name: Run Linter
         run: make lint
 
-      - name: Setup PostgreSQL
-        uses: Harmon758/postgresql-action@v1.0.0
-        with:
-          postgresql version: 10
-          postgresql db: domains
-          postgresql user: test
-          postgresql password: 1
-
       - name: Laravel Migrate
         env:
           DB_CONNECTION: pgsql
           DB_PORT: 5432
-          DB_DATABASE: domains
-          DB_USER: test
+          DB_USER: postgres
           DB_PASSWORD: 1
-        run: php artisan migrate --force
+        run: |
+          php artisan migrate
 
       - name: Run Test
-        env:
-          DB_CONNECTION: pgsql
-          DB_PORT: 5432
-          DB_DATABASE: domains
-          DB_USER: test
-          DB_PASSWORD: 1
         run: php artisan test
