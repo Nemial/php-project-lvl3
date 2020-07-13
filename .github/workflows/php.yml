@@ -32,7 +32,7 @@ jobs:
           postgresql password: 1
 
       - name: Laravel
-        run: php artisan migrate
+        run: php artisan migrate --force
 
       - name: Run Test
         run: php artisan test
