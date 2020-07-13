@@ -1,4 +1,3 @@
-
 name: Page Analyzer
 
 on:
@@ -23,8 +22,17 @@ jobs:
 
       - name: Run Linter
         run: make lint
-    # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
-    # Docs: https://getcomposer.org/doc/articles/scripts.md
 
-    # - name: Run test suite
-    #   run: composer run-script test
+      - name: Setup PostgreSQL
+        uses: Harmon758/postgresql-action@v1.0.0
+        with:
+        postgresql version: 10.13
+        postgresql db: domains
+        postgresql user: test
+        postgresql password: 1
+
+      - name: Laravel
+        run: php artisan migrate
+
+      - name: Run Test
+        run: php artisan test

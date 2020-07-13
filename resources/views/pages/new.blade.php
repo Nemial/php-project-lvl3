@@ -6,33 +6,55 @@
     <title>Page Analyzer</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
           integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-
-    <style>
-        #background {
-            background-color: #273746;
-            height: 300px;
-        }
-
-    </style>
 </head>
-<body>
-<div class="container">
-    @include('flash::message')
-</div>
-<div id="background" class="container-fluid">
-    <a style="color: white; font-size: 26px;" href="{{ route("pages") }}">Domains</a>
+<body class="d-flex flex-column">
+<header>
     <div class="container">
-        <h1 align="center" style="color: white; padding: 40px 0 0px 0">Page Analyzer</h1>
-        <form method="POST" action="/pages">
-            @csrf
-            <div class="container" align="center" style="padding: 110px 0 0 0">
-                <input type="text" name="page">
-                <input type="submit" class="btn btn-primary" value="CHECK">
-            </div>
-        </form>
+        @include('flash::message')
     </div>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">Analyzer</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-</div>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route("pages") }}">Domains</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</header>
 
+<main class="flex-grow-1 text-white">
+    <div class="jumbotron jumbotron-fluid bg-dark">
+        <div class="container-xl">
+            <div class="row">
+                <div class="col-12 col-md-10 col-lg-8 mx-auto">
+                    <h1 class="display-3">Page Analyzer</h1>
+                    <p class="lead">Check web pages for free</p>
+                    <form method="POST" action="/pages" class="d-flex justify-content-center">
+                        @csrf
+                        <input type="text" name="domain[name]" value="" class="form-control form-control-lg"
+                               placeholder="https://www.example.com">
+                        <button type="submit" class="btn btn-lg btn-primary ml-3 px-5 text-uppercase">Check</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="border-top py-3 mt-5">
+    <div class="container-lg">
+        <div class="text-center">
+            created by
+            <a href="https://github.com/Nemial" target="_blank">Nemial</a>
+        </div>
+    </div>
+</footer>
 </body>
 </html>

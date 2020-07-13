@@ -17,31 +17,35 @@ use Illuminate\Support\Facades\DB;
 |
 */
 
-Route::view("/", "pages/new")->name("main");
+Route::view("/", "pages/new")->name("/");
 
 Route::post(
     '/pages',
     function () {
-        $params = Request::all("page");
+        ["domain" => $domain] = Request::all("domain");
+        $url = parse_url($domain["name"]);
+        $normalizedName = strtolower($url["host"]);
+        $scheme = $url["scheme"];
+        $normalizedUrl = "{$scheme}://{$normalizedName}";
 
         $validator = Validator::make(
-            $params,
+            ['name' => $normalizedUrl],
             [
-                'page' => 'required|unique:domains,name|url',
+                'name' => 'required|unique:domains,name|url',
             ]
         );
         if ($validator->fails()) {
             flash('Url not valid')->error();
-            return redirect(route("main"));
+            return redirect(route("/"));
         }
-        $url = $params['page'];
         $timestamp = Carbon::now()->toDateTimeString();
         $id = DB::table('domains')->insertGetId(
-            ["name" => $url, "updated_at" => $timestamp, "created_at" => $timestamp]
+            ["name" => $normalizedUrl, "updated_at" => $timestamp, "created_at" => $timestamp]
         );
         return redirect(route("pages.show", ['id' => $id]));
     }
-);
+)->name("pages.new");
+
 Route::get(
     "/pages",
     function () {
@@ -49,6 +53,7 @@ Route::get(
         return view("pages/index", ["domains" => $domains]);
     }
 )->name("pages");
+
 Route::get(
     '/pages/{id}',
     function ($id) {

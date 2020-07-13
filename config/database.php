@@ -3,6 +3,11 @@
 use Illuminate\Support\Str;
 
 $DATABASE_URL = parse_url(getenv("DATABASE_URL"));
+$host = $DATABASE_URL["host"] ?? '127.0.0.1';
+$port = $DATABASE_URL["port"] ?? '3306';
+$database = $DATABASE_URL["path"] ? ltrim($DATABASE_URL["path"], "/") : 'domains';
+$username = $DATABASE_URL["user"] ?? 'test';
+$password = $DATABASE_URL["pass"] ?? '1';
 
 return [
 
@@ -17,7 +22,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'pgsqlHeroku'),
+    'default' => env('DB_CONNECTION', 'pgsql'),
 
     /*
     |--------------------------------------------------------------------------
@@ -60,37 +65,26 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
+            'options' => extension_loaded('pdo_mysql') ? array_filter(
+                [
+                    PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                ]
+            ) : [],
         ],
 
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DATABASE_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '5432'),
-            'database' => env('DB_DATABASE', 'forge'),
-            'username' => env('DB_USERNAME', 'forge'),
-            'password' => env('DB_PASSWORD', ''),
+            'host' => env('DB_HOST', $host),
+            'port' => env('DB_PORT', $port),
+            'database' => env('DB_DATABASE', $database),
+            'username' => env('DB_USERNAME', $username),
+            'password' => env('DB_PASSWORD', $password),
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
             'schema' => 'public',
             'sslmode' => 'prefer',
-        ],
-
-        'pgsqlHeroku' => [
-            'driver' => 'pgsql',
-            'host' => $DATABASE_URL["host"],
-            'port' => $DATABASE_URL["port"],
-            'database' => ltrim($DATABASE_URL["path"], "/"),
-            'username' => $DATABASE_URL["user"],
-            'password' => $DATABASE_URL["pass"],
-            'charset' => 'utf8',
-            'prefix' => '',
-            'schema' => 'public',
-            'sslmode' => 'require',
         ],
 
 
@@ -139,7 +133,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
+            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_'),
         ],
 
         'default' => [
