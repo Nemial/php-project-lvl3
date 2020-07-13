@@ -16,7 +16,7 @@ jobs:
         image: postgres
         env:
           POSTGRES_PASSWORD: 1
-          POSTGRES_DATABASE: hexlet
+          POSTGRES_DB: hexlet
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
