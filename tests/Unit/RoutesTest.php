@@ -44,9 +44,6 @@ class RoutesTest extends TestCase
     {
         $response = $this->post(route("pages.new"), ["domain" => ["name" => "https://ok.ru"]]);
         $response->assertRedirect(route("pages.show", ["id" => 3]));
-
-        $crashResponse = $this->post(route("pages.new"), ["domain" => ["name" => "ok.ru"]]);
-        $crashResponse->assertStatus(500);
     }
 
     public function testIndexPage()
@@ -59,5 +56,11 @@ class RoutesTest extends TestCase
     {
         $response = $this->get(route("pages.show", ["id" => 2]));
         $response->assertOk();
+    }
+
+    public function testPageCheck()
+    {
+        $response = $this->post(route('pages.check', ['id' => 1]));
+        $response->assertRedirect(route('pages.show', ['id' => 1]));
     }
 }

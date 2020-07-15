@@ -17,47 +17,79 @@ use Illuminate\Support\Facades\DB;
 |
 */
 
-Route::view("/", "pages/new")->name("/");
+Route::view('/', 'pages/new')->name('/');
 
 Route::post(
     '/pages',
     function () {
-        ["domain" => $domain] = Request::all("domain");
-        $url = parse_url($domain["name"]);
-        $normalizedName = strtolower($url["host"]);
-        $scheme = $url["scheme"];
-        $normalizedUrl = "{$scheme}://{$normalizedName}";
-
+        ['domain' => $domain] = Request::all('domain');
         $validator = Validator::make(
-            ['name' => $normalizedUrl],
+            $domain,
             [
                 'name' => 'required|unique:domains,name|url',
             ]
         );
+
         if ($validator->fails()) {
             flash('Url not valid')->error();
-            return redirect(route("/"));
+            return redirect(route('/'));
         }
+
+        $url = parse_url($domain['name']);
+        $normalizedName = strtolower($url['host']);
+        $scheme = $url['scheme'];
+        $normalizedUrl = "{$scheme}://{$normalizedName}";
+
         $timestamp = Carbon::now()->toDateTimeString();
         $id = DB::table('domains')->insertGetId(
-            ["name" => $normalizedUrl, "updated_at" => $timestamp, "created_at" => $timestamp]
+            ['name' => $normalizedUrl, 'updated_at' => $timestamp, 'created_at' => $timestamp]
         );
-        return redirect(route("pages.show", ['id' => $id]));
+
+        return redirect(route('pages.show', ['id' => $id]));
     }
-)->name("pages.new");
+)->name('pages.new');
 
 Route::get(
-    "/pages",
+    '/pages',
     function () {
-        $domains = DB::table("domains")->get();
-        return view("pages/index", ["domains" => $domains]);
+        $domains = DB::table('domain_checks')
+            ->leftJoin('domains', 'domains.id', '=', 'domain_checks.domain_id')
+            ->orderBy('domains.id')
+            ->orderBy('domain_checks.created_at', 'desc')
+            ->distinct('domains.id')
+            ->get(['domains.id', 'domains.name', 'domain_checks.created_at', 'status_code',]);
+
+        return view('pages/index', ['domains' => $domains]);
     }
 )->name("pages");
 
 Route::get(
     '/pages/{id}',
     function ($id) {
-        $domain = DB::table("domains")->where('id', $id)->first();
-        return view("pages/show", ['domain' => $domain]);
+        $domain = DB::table('domains')->where('id', $id)->first();
+        $checks = DB::table('domain_checks')->where('domain_id', $id)->get();
+
+        return view('pages/show', ['domain' => $domain, 'checks' => $checks]);
     }
-)->name("pages.show");
+)->name('pages.show');
+
+Route::post(
+    '/pages/{id}/checks',
+    function ($id) {
+        $timestamp = now()->toDateTimeString();
+        DB::table('domain_checks')->insert(
+            [
+                'domain_id' => $id,
+                'status_code' => 200,
+                'h1' => '',
+                'keywords' => '',
+                'description' => '',
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ]
+        );
+        flash('Website has been checked!')->info();
+
+        return redirect(route('pages.show', ['id' => $id]));
+    }
+)->name("pages.check");

@@ -1,5 +1,5 @@
 lint:
-	composer phpcs -- --standard=PSR12 tests
+	composer phpcs -- --standard=PSR12 tests routes
 lint-fix:
 	composer phpcbf
 deploy:

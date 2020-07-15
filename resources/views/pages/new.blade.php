@@ -9,11 +9,8 @@
 </head>
 <body class="d-flex flex-column">
 <header>
-    <div class="container">
-        @include('flash::message')
-    </div>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">Analyzer</a>
+        <a class="navbar-brand" href="{{ route("/") }}">Analyzer</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -28,6 +25,9 @@
         </div>
     </nav>
 </header>
+<div class="container">
+    @include('flash::message')
+</div>
 
 <main class="flex-grow-1 text-white">
     <div class="jumbotron jumbotron-fluid bg-dark">
@@ -36,11 +36,11 @@
                 <div class="col-12 col-md-10 col-lg-8 mx-auto">
                     <h1 class="display-3">Page Analyzer</h1>
                     <p class="lead">Check web pages for free</p>
-                    <form method="POST" action="/pages" class="d-flex justify-content-center">
+                    <form method="POST" action="{{ route("pages") }}" class="d-flex justify-content-center">
                         @csrf
                         <input type="text" name="domain[name]" value="" class="form-control form-control-lg"
                                placeholder="https://www.example.com">
-                        <button type="submit" class="btn btn-lg btn-primary ml-3 px-5 text-uppercase">Check</button>
+                        <input type="submit" class="btn btn-lg btn-primary ml-3 px-5 text-uppercase" value="Check">
                     </form>
                 </div>
             </div>
