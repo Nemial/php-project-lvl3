@@ -3,11 +3,13 @@
 namespace Tests\Unit;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class RoutesTest extends TestCase
 {
+
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -60,7 +62,14 @@ class RoutesTest extends TestCase
 
     public function testPageCheck()
     {
+        Http::fake(
+            [
+                'https://dark.com' => Http::response(['foo' => 'bar'], 200, ['Headers']),
+            ]
+        );
+
         $response = $this->post(route('pages.check', ['id' => 1]));
         $response->assertRedirect(route('pages.show', ['id' => 1]));
     }
+
 }

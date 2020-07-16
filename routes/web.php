@@ -4,6 +4,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 
 /*
@@ -77,10 +78,12 @@ Route::post(
     '/pages/{id}/checks',
     function ($id) {
         $timestamp = now()->toDateTimeString();
+        $domain = DB::table('domains')->where('id', $id)->first('name');
+        $response = Http::get($domain->name);
         DB::table('domain_checks')->insert(
             [
                 'domain_id' => $id,
-                'status_code' => 200,
+                'status_code' => $response->status(),
                 'h1' => '',
                 'keywords' => '',
                 'description' => '',
