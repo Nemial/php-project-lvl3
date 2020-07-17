@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
+use DiDom\Document;
 
 /*
 |--------------------------------------------------------------------------
@@ -80,13 +81,40 @@ Route::post(
         $timestamp = now()->toDateTimeString();
         $domain = DB::table('domains')->where('id', $id)->first('name');
         $response = Http::get($domain->name);
+
+        $document = new Document($domain->name, true);
+
+        if ($document->has('h1')) {
+            $unFormatH1 = $document->first('h1::text');
+            $h1 = mb_strlen($unFormatH1) > 30 ? substr_replace($unFormatH1, '...', 30) : $unFormatH1;
+        }
+
+        if ($document->has('meta[name=description]')) {
+            $unFormatDescription = $document->first('meta[name=description]')->first('meta::attr(content)');
+            $description = mb_strlen($unFormatDescription) > 30 ? substr_replace(
+                $unFormatDescription,
+                '...',
+                30
+            ) : $unFormatDescription;
+        }
+
+        if ($document->has('meta[name=keywords]')) {
+            $unFormatKeywords = $document->first('meta[name=keywords]')->first('meta::attr(content)');
+            $keywords = mb_strlen($unFormatKeywords) > 30 ? substr_replace(
+                $unFormatKeywords,
+                '...',
+                30
+            ) : $unFormatKeywords;
+        }
+
+
         DB::table('domain_checks')->insert(
             [
                 'domain_id' => $id,
                 'status_code' => $response->status(),
-                'h1' => '',
-                'keywords' => '',
-                'description' => '',
+                'h1' => $h1 ?? '',
+                'keywords' => $keywords ?? '',
+                'description' => $description ?? '',
                 'created_at' => $timestamp,
                 'updated_at' => $timestamp,
             ]

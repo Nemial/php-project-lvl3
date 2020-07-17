@@ -9,6 +9,7 @@ use Tests\TestCase;
 
 class RoutesTest extends TestCase
 {
+
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -63,11 +64,12 @@ class RoutesTest extends TestCase
     {
         Http::fake(
             [
-                'https://dark.com' => Http::response(['foo' => 'bar'], 200, ['Headers']),
+                'https://dark.com' => Http::response(['<h1>Main</h1>'], 300, ['Headers']),
             ]
         );
 
         $response = $this->post(route('pages.check', ['id' => 1]));
         $response->assertRedirect(route('pages.show', ['id' => 1]));
     }
+
 }

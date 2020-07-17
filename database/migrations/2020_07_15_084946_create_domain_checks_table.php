@@ -19,7 +19,7 @@ class CreateDomainChecksTable extends Migration
             $table->integer("status_code");
             $table->string("h1");
             $table->string("keywords");
-            $table->text("description");
+            $table->string("description");
             $table->timestamp("updated_at");
             $table->timestamp("created_at");
         });
