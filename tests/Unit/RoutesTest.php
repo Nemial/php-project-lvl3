@@ -9,7 +9,6 @@ use Tests\TestCase;
 
 class RoutesTest extends TestCase
 {
-
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -71,5 +70,4 @@ class RoutesTest extends TestCase
         $response = $this->post(route('pages.check', ['id' => 1]));
         $response->assertRedirect(route('pages.show', ['id' => 1]));
     }
-
 }
