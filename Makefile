@@ -8,3 +8,5 @@ log:
 	tail -f storage/logs/laravel.log
 start:
 	php artisan serve --host localhost
+test-coverage:
+	composer phpunit -- tests --whitelist tests --coverage-clover coverage-report
