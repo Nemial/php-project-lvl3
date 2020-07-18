@@ -17,7 +17,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route("pages") }}">Domains</a>
+                    <a class="nav-link" href="{{ route("domains") }}">Domains</a>
                 </li>
             </ul>
         </div>
@@ -52,7 +52,7 @@
             </table>
         </div>
         <h2 class="mt-5 mb-3">Checks</h2>
-        <form method="POST" action="{{ route("pages.check", ['id' => $domain->id]) }}">
+        <form method="POST" action="{{ route("domains.check", ['id' => $domain->id]) }}">
             @csrf
             <input type="submit" class="btn btn-primary mb-3" value="Run check">
         </form>

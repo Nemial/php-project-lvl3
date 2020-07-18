@@ -18,7 +18,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link active" href="{{ route("pages") }}">Domains</a>
+                    <a class="nav-link active" href="{{ route("domains") }}">Domains</a>
                 </li>
             </ul>
         </div>
@@ -39,7 +39,7 @@
                 @foreach($domains as $domain)
                     <tr>
                         <td>{{ $domain->id }}</td>
-                        <td><a href="{{ url("/pages/$domain->id") }}">{{ $domain->name }}</a></td>
+                        <td><a href="{{ url("/domains/$domain->id") }}">{{ $domain->name }}</a></td>
                         <td>{{ $domain->created_at }}</td>
                         <td>{{ $domain->status_code }}</td>
                     </tr>

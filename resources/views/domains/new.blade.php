@@ -19,7 +19,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route("pages") }}">Domains</a>
+                    <a class="nav-link" href="{{ route("domains") }}">Domains</a>
                 </li>
             </ul>
         </div>
@@ -36,7 +36,7 @@
                 <div class="col-12 col-md-10 col-lg-8 mx-auto">
                     <h1 class="display-3">Page Analyzer</h1>
                     <p class="lead">Check web pages for free</p>
-                    <form method="POST" action="{{ route("pages") }}" class="d-flex justify-content-center">
+                    <form method="POST" action="{{ route("domains") }}" class="d-flex justify-content-center">
                         @csrf
                         <input type="text" name="domain[name]" value="" class="form-control form-control-lg"
                                placeholder="https://www.example.com">

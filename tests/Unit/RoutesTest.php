@@ -43,19 +43,19 @@ class RoutesTest extends TestCase
 
     public function testCreatePage()
     {
-        $response = $this->post(route("pages.new"), ["domain" => ["name" => "https://ok.ru"]]);
-        $response->assertRedirect(route("pages.show", ["id" => 3]));
+        $response = $this->post(route("domains.new"), ["domain" => ["name" => "https://ok.ru"]]);
+        $response->assertRedirect(route("domains.show", ["id" => 3]));
     }
 
     public function testIndexPage()
     {
-        $response = $this->get(route("pages"));
+        $response = $this->get(route("domains"));
         $response->assertOk();
     }
 
     public function testPageShow()
     {
-        $response = $this->get(route("pages.show", ["id" => 2]));
+        $response = $this->get(route("domains.show", ["id" => 2]));
         $response->assertOk();
     }
 
@@ -63,11 +63,11 @@ class RoutesTest extends TestCase
     {
         Http::fake(
             [
-                'https://dark.com' => Http::response(['<h1>Main</h1>'], 300, ['Headers']),
+                'https://dark.com' => Http::response([], 204, []),
             ]
         );
 
-        $response = $this->post(route('pages.check', ['id' => 1]));
-        $response->assertRedirect(route('pages.show', ['id' => 1]));
+        $response = $this->post(route('domains.check', ['id' => 1]));
+        $response->assertRedirect(route('domains.show', ['id' => 1]));
     }
 }

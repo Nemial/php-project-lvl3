@@ -19,10 +19,10 @@ use DiDom\Document;
 |
 */
 
-Route::view('/', 'pages/new')->name('/');
+Route::view('/', 'domains/new')->name('/');
 
 Route::post(
-    '/pages',
+    '/domains',
     function () {
         ['domain' => $domain] = Request::all('domain');
         $validator = Validator::make(
@@ -34,7 +34,7 @@ Route::post(
 
         if ($validator->fails()) {
             flash('Url not valid')->error();
-            return redirect(route('/'));
+            return redirect()->route('/');
         }
 
         $url = parse_url($domain['name']);
@@ -47,12 +47,12 @@ Route::post(
             ['name' => $normalizedUrl, 'updated_at' => $timestamp, 'created_at' => $timestamp]
         );
 
-        return redirect(route('pages.show', ['id' => $id]));
+        return redirect()->route('domains.show', ['id' => $id]);
     }
-)->name('pages.new');
+)->name('domains.new');
 
 Route::get(
-    '/pages',
+    '/domains',
     function () {
         $domains = DB::table('domain_checks')
             ->leftJoin('domains', 'domains.id', '=', 'domain_checks.domain_id')
@@ -61,28 +61,28 @@ Route::get(
             ->distinct('domains.id')
             ->get(['domains.id', 'domains.name', 'domain_checks.created_at', 'status_code',]);
 
-        return view('pages/index', ['domains' => $domains]);
+        return view('domains/index', ['domains' => $domains]);
     }
-)->name("pages");
+)->name("domains");
 
 Route::get(
-    '/pages/{id}',
+    '/domains/{id}',
     function ($id) {
         $domain = DB::table('domains')->where('id', $id)->first();
         $checks = DB::table('domain_checks')->where('domain_id', $id)->get();
 
-        return view('pages/show', ['domain' => $domain, 'checks' => $checks]);
+        return view('domains/show', ['domain' => $domain, 'checks' => $checks]);
     }
-)->name('pages.show');
+)->name('domains.show');
 
 Route::post(
-    '/pages/{id}/checks',
+    '/domains/{id}/checks',
     function ($id) {
         $timestamp = now()->toDateTimeString();
         $domain = DB::table('domains')->where('id', $id)->first('name');
         $response = Http::get($domain->name);
-
-        $document = new Document($domain->name, true);
+        $isFileSite = $response->status() !== 204;
+        $document = new Document($domain->name, $isFileSite);
 
         if ($document->has('h1')) {
             $unFormatH1 = $document->first('h1::text');
@@ -121,6 +121,6 @@ Route::post(
         );
         flash('Website has been checked!')->info();
 
-        return redirect(route('pages.show', ['id' => $id]));
+        return redirect()->route('domains.show', ['id' => $id]);
     }
-)->name("pages.check");
+)->name("domains.check");
