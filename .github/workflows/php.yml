@@ -53,10 +53,10 @@ jobs:
         run: php artisan test
 
 
-#      - name: Test & publish code coverage
-#        uses: paambaati/codeclimate-action@v2.6.0
-#        env:
-#          CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID_MY}}
-#        with:
-#          coverageCommand: make test-coverage
-#          coverageLocations: ${{github.workspace}}/coverage-report:clover
+      - name: Test & publish code coverage
+        uses: paambaati/codeclimate-action@v2.6.0
+        env:
+          CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID_MY}}
+        with:
+          coverageCommand: make test-coverage
+          coverageLocations: ${{github.workspace}}/coverage-report:clover
