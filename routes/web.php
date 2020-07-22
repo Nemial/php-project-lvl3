@@ -81,9 +81,7 @@ Route::post(
         $timestamp = now()->toDateTimeString();
         $domain = DB::table('domains')->where('id', $id)->first('name');
         $response = Http::get($domain->name);
-        $isFileSite = $response->status() !== 204;
-        $domainName = $domain->name;
-        $document = new Document($domainName, $isFileSite);
+        $document = new Document($response->body());
 
         if ($document->has('h1')) {
             $unFormatH1 = $document->first('h1::text');
