@@ -19,12 +19,18 @@ use DiDom\Document;
 |
 */
 
-Route::view('/', 'domains/new')->name('/');
+Route::view('/', 'domains/new')->name('home');
 
 Route::post(
     '/domains',
     function () {
         ['domain' => $domain] = Request::all('domain');
+        $currentDomain = DB::table('domains')->where('name', $domain['name'])->first('id');
+
+        if (!is_null($currentDomain)) {
+            return redirect()->route('domains.show', ['id' => $currentDomain->id]);
+        }
+
         $validator = Validator::make(
             $domain,
             [
@@ -34,7 +40,7 @@ Route::post(
 
         if ($validator->fails()) {
             flash('Url not valid')->error();
-            return redirect()->route('/');
+            return redirect()->route('home');
         }
 
         $url = parse_url($domain['name']);
@@ -49,7 +55,7 @@ Route::post(
 
         return redirect()->route('domains.show', ['id' => $id]);
     }
-)->name('domains.new');
+)->name('domains.store');
 
 Route::get(
     '/domains',
@@ -69,6 +75,11 @@ Route::get(
     '/domains/{id}',
     function ($id) {
         $domain = DB::table('domains')->where('id', $id)->first();
+
+        if (is_null($domain)) {
+            return redirect()->route('home')->setStatusCode(404);
+        }
+
         $checks = DB::table('domain_checks')->where('domain_id', $id)->get();
 
         return view('domains/show', ['domain' => $domain, 'checks' => $checks]);

@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -32,14 +31,27 @@ class DomainsControllerTest extends TestCase
      */
     public function testMainPage()
     {
-        $response = $this->get(route("/"));
+        $response = $this->get(route("home"));
         $response->assertOk();
     }
 
     public function testDomainsCreate()
     {
-        $response = $this->get(route("domains.new"));
+        $response = $this->get(route("domains.store"));
         $response->assertOk();
+    }
+
+    public function testDomainsStore()
+    {
+        $data = ['domain' => ['name' => 'http://ok.ru']];
+        $response = $this->post(route('domains.store', $data));
+        $response->assertRedirect(route('domains.show', ['id' => 2]));
+        $this->assertDatabaseHas(
+            'domains',
+            [
+                'name' => 'http://ok.ru',
+            ]
+        );
     }
 
     public function testDomainsIndex()

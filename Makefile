@@ -16,3 +16,5 @@ start:
 	php artisan serve --host localhost
 test-coverage:
 	composer phpunit -- tests --whitelist tests --coverage-clover coverage-report
+test:
+	php artisan test
