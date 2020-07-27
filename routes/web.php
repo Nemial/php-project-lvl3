@@ -24,12 +24,7 @@ Route::view('/', 'domains/new')->name('home');
 Route::post(
     '/domains',
     function () {
-        ['domain' => $domain] = Request::all('domain');
-        $currentDomain = DB::table('domains')->where('name', $domain['name'])->first('id');
-
-        if (!is_null($currentDomain)) {
-            return redirect()->route('domains.show', ['id' => $currentDomain->id]);
-        }
+        $domain = Request::input('domain');
 
         $validator = Validator::make(
             $domain,
@@ -40,7 +35,7 @@ Route::post(
 
         if ($validator->fails()) {
             flash('Url not valid')->error();
-            return redirect()->route('home');
+            return view('domains/new', ['name' => $domain['name']]);
         }
 
         $url = parse_url($domain['name']);
@@ -48,11 +43,19 @@ Route::post(
         $scheme = $url['scheme'];
         $normalizedUrl = "{$scheme}://{$normalizedName}";
 
+        $currentDomain = DB::table('domains')->where('name', $domain['name'])->first('id');
+
+        if (!is_null($currentDomain)) {
+            flash('Url already exists ')->info();
+            return redirect()->route('domains.show', ['id' => $currentDomain->id]);
+        }
+
         $timestamp = Carbon::now()->toDateTimeString();
         $id = DB::table('domains')->insertGetId(
             ['name' => $normalizedUrl, 'updated_at' => $timestamp, 'created_at' => $timestamp]
         );
 
+        flash('Url has been added ')->success();
         return redirect()->route('domains.show', ['id' => $id]);
     }
 )->name('domains.store');

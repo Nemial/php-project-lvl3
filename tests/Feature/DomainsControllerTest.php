@@ -29,12 +29,6 @@ class DomainsControllerTest extends TestCase
      *
      * @return void
      */
-    public function testMainPage()
-    {
-        $response = $this->get(route("home"));
-        $response->assertOk();
-    }
-
     public function testDomainsCreate()
     {
         $response = $this->get(route("domains.store"));
@@ -43,14 +37,12 @@ class DomainsControllerTest extends TestCase
 
     public function testDomainsStore()
     {
-        $data = ['domain' => ['name' => 'http://ok.ru']];
-        $response = $this->post(route('domains.store', $data));
-        $response->assertRedirect(route('domains.show', ['id' => 2]));
+        $domainData = ['name' => 'http://ok.ru'];
+        $response = $this->post(route('domains.store', ['domain' => $domainData]));
+        $response->assertRedirect();
         $this->assertDatabaseHas(
             'domains',
-            [
-                'name' => 'http://ok.ru',
-            ]
+            $domainData
         );
     }
 
@@ -62,7 +54,8 @@ class DomainsControllerTest extends TestCase
 
     public function testDomainsShow()
     {
-        $response = $this->get(route("domains.show", ['id' => 1]));
+        $domain = DB::table('domains')->first();
+        $response = $this->get(route("domains.show", ['id' => $domain->id]));
         $response->assertOk();
     }
 }

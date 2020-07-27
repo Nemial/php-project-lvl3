@@ -34,11 +34,11 @@ class DomainsCheckControllerTest extends TestCase
     {
         Http::fake(
             [
-                'https://dark.com' => Http::response([], 204, []),
+                'https://dark.com' => Http::response([], 200, []),
             ]
         );
-
-        $response = $this->post(route('domains.check', ['id' => 1]));
-        $response->assertRedirect(route('domains.show', ['id' => 1]));
+        $domain = DB::table('domains')->first();
+        $response = $this->post(route('domains.check', ['id' => $domain->id]));
+        $response->assertRedirect(route('domains.show', ['id' => $domain->id]));
     }
 }
