@@ -19,12 +19,7 @@ use DiDom\Document;
 |
 */
 
-Route::get(
-    '/',
-    function () {
-        return view('domains/new');
-    }
-)->name('home');
+Route::view('/', 'domains/new')->name('home');
 
 Route::post(
     '/domains',
