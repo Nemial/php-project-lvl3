@@ -19,7 +19,12 @@ use DiDom\Document;
 |
 */
 
-Route::view('/', 'domains/new')->name('home');
+Route::get(
+    '/',
+    function () {
+        return view('domains/new');
+    }
+)->name('home');
 
 Route::post(
     '/domains',
@@ -34,18 +39,18 @@ Route::post(
         );
 
         if ($validator->fails()) {
-            flash('Url not valid')->error();
-            return view('domains/new', ['name' => $domain['name']]);
+            session(['nameUrl' => $domain['name']]);
+            return redirect()->route('home')->withErrors($validator->errors());
         }
 
         $url = parse_url($domain['name']);
-        $normalizedName = strtolower($url['host']);
-        $scheme = $url['scheme'];
+        $normalizedName = mb_strtolower($url['host']);
+        $scheme = $url['scheme'] ?? 'https';
         $normalizedUrl = "{$scheme}://{$normalizedName}";
 
         $currentDomain = DB::table('domains')->where('name', $domain['name'])->first('id');
 
-        if (!is_null($currentDomain)) {
+        if ($currentDomain) {
             flash('Url already exists ')->info();
             return redirect()->route('domains.show', ['id' => $currentDomain->id]);
         }
@@ -63,12 +68,20 @@ Route::post(
 Route::get(
     '/domains',
     function () {
-        $domains = DB::table('domain_checks')
-            ->leftJoin('domains', 'domains.id', '=', 'domain_checks.domain_id')
-            ->orderBy('domains.id')
-            ->orderBy('domain_checks.created_at', 'desc')
-            ->distinct('domains.id')
-            ->get(['domains.id', 'domains.name', 'domain_checks.created_at', 'status_code',]);
+        $domains = DB::table('domains')->get(['id', 'name']);
+        $checks = DB::table('domain_checks')->orderBy('domain_id')
+            ->orderBy('created_at', 'desc')
+            ->distinct('domain_id')
+            ->get(['domain_id', 'created_at', 'status_code']);
+
+        foreach ($domains as $domain) {
+            foreach ($checks as $check) {
+                if ($domain->id === $check->domain_id) {
+                    $domain->created_at = $check->created_at ?? '';
+                    $domain->status_code = $check->status_code ?? '';
+                }
+            }
+        }
 
         return view('domains/index', ['domains' => $domains]);
     }
@@ -78,10 +91,7 @@ Route::get(
     '/domains/{id}',
     function ($id) {
         $domain = DB::table('domains')->where('id', $id)->first();
-
-        if (is_null($domain)) {
-            return redirect()->route('home')->setStatusCode(404);
-        }
+        abort_unless($domain, 404);
 
         $checks = DB::table('domain_checks')->where('domain_id', $id)->get();
 

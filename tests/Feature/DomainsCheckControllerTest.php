@@ -11,6 +11,8 @@ class DomainsCheckControllerTest extends TestCase
 {
     use RefreshDatabase;
 
+    private $id;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -23,22 +25,43 @@ class DomainsCheckControllerTest extends TestCase
                 ],
             ]
         );
+        $domain = DB::table('domains')->first(['id']);
+        $this->id = $domain->id;
+    }
+
+    public function makePathToFixtures($file)
+    {
+        $parts = [__DIR__, '..', "fixtures", $file];
+        return implode("/", $parts);
     }
 
     /**
-     * A basic feature test example.
-     *
-     * @return void
+     * @dataProvider dataProvider
      */
-    public function testDomainsCheck()
+    public function testDomainsCheck($body)
     {
+        $parsedBody = file_get_contents($this->makePathToFixtures($body));
         Http::fake(
             [
-                'https://dark.com' => Http::response([], 200, []),
+                'https://dark.com' => Http::response($parsedBody, 200, []),
             ]
         );
-        $domain = DB::table('domains')->first();
-        $response = $this->post(route('domains.check', ['id' => $domain->id]));
-        $response->assertRedirect(route('domains.show', ['id' => $domain->id]));
+        $response = $this->post(route('domains.check', ['id' => $this->id]));
+        $response->assertRedirect(route('domains.show', ['id' => $this->id]));
+        $this->assertDatabaseHas(
+            'domain_checks',
+            [
+                'h1' => 'Hello',
+                'description' => 'Desc',
+                'keywords' => 'test',
+            ]
+        );
+    }
+
+    public function dataProvider()
+    {
+        return [
+            'body' => ['body.html'],
+        ];
     }
 }

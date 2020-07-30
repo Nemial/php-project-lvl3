@@ -22,6 +22,19 @@ class DomainsControllerTest extends TestCase
                 ],
             ]
         );
+        DB::table('domain_checks')->insert(
+            [
+                [
+                    'domain_id' => 1,
+                    'status_code' => 200,
+                    'h1' => '',
+                    'keywords' => '',
+                    'description' => '',
+                    'updated_at' => now()->toDateTimeString(),
+                    'created_at' => now()->toDateTimeString(),
+                ],
+            ]
+        );
     }
 
     /**
@@ -29,21 +42,13 @@ class DomainsControllerTest extends TestCase
      *
      * @return void
      */
-    public function testDomainsCreate()
-    {
-        $response = $this->get(route("domains.store"));
-        $response->assertOk();
-    }
-
     public function testDomainsStore()
     {
         $domainData = ['name' => 'http://ok.ru'];
         $response = $this->post(route('domains.store', ['domain' => $domainData]));
         $response->assertRedirect();
-        $this->assertDatabaseHas(
-            'domains',
-            $domainData
-        );
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('domains', $domainData);
     }
 
     public function testDomainsIndex()

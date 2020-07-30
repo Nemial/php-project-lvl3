@@ -4,7 +4,6 @@
     @parent
     <a class="nav-link" href="{{ route("domains") }}">Domains</a>
 @endsection
-@section('flash')
 
 @section('main')
     <main class="flex-grow-1 text-white">
@@ -14,9 +13,13 @@
                     <div class="col-12 col-md-10 col-lg-8 mx-auto">
                         <h1 class="display-3">Page Analyzer</h1>
                         <p class="lead">Check web pages for free</p>
+                        @error('name')
+                        <div class="alert alert-danger">{{ $message }}</div>
+                        @enderror
                         <form method="POST" action="{{ route("domains") }}" class="d-flex justify-content-center">
                             @csrf
-                            <input type="text" name="domain[name]" value="{{ $name ?? '' }}" class="form-control form-control-lg"
+                            <input type="text" name="domain[name]" value="{{ session()->get('nameUrl') ?? '' }}"
+                                   class="form-control form-control-lg"
                                    placeholder="https://www.example.com">
                             <input type="submit" class="btn btn-lg btn-primary ml-3 px-5 text-uppercase" value="Check">
                         </form>
