@@ -18,7 +18,7 @@
                         @enderror
                         <form method="POST" action="{{ route("domains") }}" class="d-flex justify-content-center">
                             @csrf
-                            <input type="text" name="domain[name]" value="{{ session()->get('nameUrl') ?? '' }}"
+                            <input type="text" name="domain[name]" value="{{ session()->pull('nameUrl') ?? '' }}"
                                    class="form-control form-control-lg"
                                    placeholder="https://www.example.com">
                             <input type="submit" class="btn btn-lg btn-primary ml-3 px-5 text-uppercase" value="Check">
