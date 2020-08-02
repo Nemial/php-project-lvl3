@@ -117,8 +117,9 @@ Route::post(
             }
         );
         $description = optional(
-            $document->first('meta[name=description]')->first('meta::attr(content)'),
-            function ($unFormatDescription) {
+            $document->first('meta[name=description]'),
+            function ($document) {
+                $unFormatDescription = $document->first('meta::attr(content)');
                 return mb_strlen($unFormatDescription) > 30 ? substr_replace(
                     $unFormatDescription,
                     '...',
@@ -127,8 +128,9 @@ Route::post(
             }
         );
         $keywords = optional(
-            $document->first('meta[name=keywords]')->first('meta::attr(content)'),
-            function ($unFormatKeywords) {
+            $document->first('meta[name=keywords]'),
+            function ($document) {
+                $unFormatKeywords = $document->first('meta::attr(content)');
                 return mb_strlen($unFormatKeywords) > 30 ? substr_replace(
                     $unFormatKeywords,
                     '...',
@@ -142,9 +144,9 @@ Route::post(
             [
                 'domain_id' => $id,
                 'status_code' => $response->status(),
-                'h1' => $h1 ?? '',
-                'keywords' => $keywords ?? '',
-                'description' => $description ?? '',
+                'h1' => is_null($h1) ? '' : $h1,
+                'keywords' => is_null($keywords) ? '' : $keywords,
+                'description' => is_null($h1) ? '' : $description,
                 'created_at' => $timestamp,
                 'updated_at' => $timestamp,
             ]
