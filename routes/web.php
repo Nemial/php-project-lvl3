@@ -120,10 +120,10 @@ Route::post(
             $document->first('meta[name=description]'),
             function ($document) {
                 $unFormatDescription = $document->first('meta::attr(content)');
-                return mb_strlen($unFormatDescription) > 30 ? substr_replace(
+                return mb_strlen($unFormatDescription) > 29 ? substr_replace(
                     $unFormatDescription,
                     '...',
-                    30
+                    29
                 ) : $unFormatDescription;
             }
         );
@@ -146,7 +146,7 @@ Route::post(
                 'status_code' => $response->status(),
                 'h1' => is_null($h1) ? '' : $h1,
                 'keywords' => is_null($keywords) ? '' : $keywords,
-                'description' => is_null($h1) ? '' : $description,
+                'description' => is_null($description) ? '' : $description,
                 'created_at' => $timestamp,
                 'updated_at' => $timestamp,
             ]
