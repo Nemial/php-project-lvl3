@@ -1,13 +1,8 @@
 @extends('layouts.page')
 @section('title', 'Page Analyzer')
-@section('nav-link')
-    @parent
-    <a class="nav-link" href="{{ route("domains") }}">Domains</a>
-@endsection
 
 @section('main')
-    <main class="flex-grow-1 text-white">
-        <div class="jumbotron jumbotron-fluid bg-dark">
+        <div class="jumbotron jumbotron-fluid bg-dark text-white">
             <div class="container-xl">
                 <div class="row">
                     <div class="col-12 col-md-10 col-lg-8 mx-auto">
@@ -27,5 +22,4 @@
                 </div>
             </div>
         </div>
-    </main>
 @endsection

@@ -21,8 +21,8 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    @section('nav-link')
-                    @show
+                    <a class="nav-link {{ \Illuminate\Support\Facades\Request::path() === 'domains' ? 'active' : '' }}"
+                       href="{{ route("domains") }}">Domains</a>
                 </li>
             </ul>
         </div>
@@ -35,8 +35,12 @@
     </div>
 @show
 
-@section('main')
-@show
+
+<main class="flex-grow-1">
+    @section('main')
+    @show
+</main>
+
 
 <footer class="border-top py-3 mt-5">
     <div class="container-lg">

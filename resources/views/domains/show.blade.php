@@ -10,8 +10,6 @@
 @section('flash')
 
 @section('main')
-    @parent
-    <main class="flex-grow-1">
         <div class="container-lg">
             <h1 class="mt-5 mb-3">Site: {{ $domain->name }}</h1>
             <div class="table-responsive">
@@ -64,5 +62,4 @@
                 </tbody>
             </table>
         </div>
-    </main>
 @endsection

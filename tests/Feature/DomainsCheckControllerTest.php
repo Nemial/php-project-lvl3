@@ -29,18 +29,10 @@ class DomainsCheckControllerTest extends TestCase
         $this->id = $domain->id;
     }
 
-    public function makePathToFixtures($file)
+    public function testDomainsCheck()
     {
-        $parts = [__DIR__, '..', "fixtures", $file];
-        return implode("/", $parts);
-    }
-
-    /**
-     * @dataProvider dataProvider
-     */
-    public function testDomainsCheck($body)
-    {
-        $parsedBody = file_get_contents($this->makePathToFixtures($body));
+        $testFilePath = $this->makePathToFixtures('body.html');
+        $parsedBody = file_get_contents($testFilePath);
         Http::fake(
             [
                 'https://dark.com' => Http::response($parsedBody, 200, []),
@@ -51,17 +43,12 @@ class DomainsCheckControllerTest extends TestCase
         $this->assertDatabaseHas(
             'domain_checks',
             [
+                'domain_id' => $this->id,
+                'status_code' => 200,
                 'h1' => 'Hello',
-                'description' => 'Desc',
                 'keywords' => 'test',
+                'description' => 'Desc',
             ]
         );
-    }
-
-    public function dataProvider()
-    {
-        return [
-            'body' => ['body.html'],
-        ];
     }
 }

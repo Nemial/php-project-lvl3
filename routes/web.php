@@ -19,7 +19,7 @@ use DiDom\Document;
 |
 */
 
-Route::view('/', 'domains/new')->name('home');
+Route::view('/', 'home')->name('home');
 
 Route::post(
     '/domains',
@@ -97,33 +97,45 @@ Route::get(
 Route::post(
     '/domains/{id}/checks',
     function ($id) {
+        try {
+            if (!DB::table('domains')->find($id)) {
+                throw new Exception("Id not exist");
+            }
+        } catch (Exception $e) {
+            abort_unless(false, 404, $e);
+        }
+
         $timestamp = now()->toDateTimeString();
         $domain = DB::table('domains')->where('id', $id)->first('name');
         $response = Http::get($domain->name);
         $document = new Document($response->body());
 
-        if ($document->has('h1')) {
-            $unFormatH1 = $document->first('h1::text');
-            $h1 = mb_strlen($unFormatH1) > 30 ? substr_replace($unFormatH1, '...', 30) : $unFormatH1;
-        }
-
-        if ($document->has('meta[name=description]')) {
-            $unFormatDescription = $document->first('meta[name=description]')->first('meta::attr(content)');
-            $description = mb_strlen($unFormatDescription) > 30 ? substr_replace(
-                $unFormatDescription,
-                '...',
-                30
-            ) : $unFormatDescription;
-        }
-
-        if ($document->has('meta[name=keywords]')) {
-            $unFormatKeywords = $document->first('meta[name=keywords]')->first('meta::attr(content)');
-            $keywords = mb_strlen($unFormatKeywords) > 30 ? substr_replace(
-                $unFormatKeywords,
-                '...',
-                30
-            ) : $unFormatKeywords;
-        }
+        $h1 = optional(
+            $document->first('h1::text'),
+            function ($unFormatH1) {
+                return mb_strlen($unFormatH1) > 30 ? substr_replace($unFormatH1, '...', 30) : $unFormatH1;
+            }
+        );
+        $description = optional(
+            $document->first('meta[name=description]')->first('meta::attr(content)'),
+            function ($unFormatDescription) {
+                return mb_strlen($unFormatDescription) > 30 ? substr_replace(
+                    $unFormatDescription,
+                    '...',
+                    30
+                ) : $unFormatDescription;
+            }
+        );
+        $keywords = optional(
+            $document->first('meta[name=keywords]')->first('meta::attr(content)'),
+            function ($unFormatKeywords) {
+                return mb_strlen($unFormatKeywords) > 30 ? substr_replace(
+                    $unFormatKeywords,
+                    '...',
+                    30
+                ) : $unFormatKeywords;
+            }
+        );
 
 
         DB::table('domain_checks')->insert(
