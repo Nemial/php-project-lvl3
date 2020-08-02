@@ -116,17 +116,16 @@ Route::post(
                 return mb_strlen($unFormatH1) > 30 ? substr_replace($unFormatH1, '...', 30) : $unFormatH1;
             }
         );
-        $description = optional(
-            $document->first('meta[name=description]'),
-            function ($document) {
-                $unFormatDescription = $document->first('meta::attr(content)');
-                return mb_strlen($unFormatDescription) > 29 ? substr_replace(
-                    $unFormatDescription,
-                    '...',
-                    29
-                ) : $unFormatDescription;
-            }
-        );
+
+        if ($document->has('meta[name=description]')) {
+            $unFormatDescription = $document->first('meta[name=description]')->first('meta::attr(content)');
+            $description = mb_strlen($unFormatDescription) > 30 ? substr_replace(
+                $unFormatDescription,
+                '...',
+                30
+            ) : $unFormatDescription;
+        }
+
         $keywords = optional(
             $document->first('meta[name=keywords]'),
             function ($document) {
@@ -146,7 +145,7 @@ Route::post(
                 'status_code' => $response->status(),
                 'h1' => is_null($h1) ? '' : $h1,
                 'keywords' => is_null($keywords) ? '' : $keywords,
-                'description' => is_null($description) ? '' : $description,
+                'description' => $description ?? '',
                 'created_at' => $timestamp,
                 'updated_at' => $timestamp,
             ]
