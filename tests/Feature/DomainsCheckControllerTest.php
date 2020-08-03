@@ -31,7 +31,7 @@ class DomainsCheckControllerTest extends TestCase
 
     public function testDomainsCheck()
     {
-        $testFilePath = $this->makePathToFixtures('body.html');
+        $testFilePath = $this->makePathToFixtures('index.html');
         $parsedBody = file_get_contents($testFilePath);
         Http::fake(
             [

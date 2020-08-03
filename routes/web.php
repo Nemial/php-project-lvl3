@@ -98,60 +98,57 @@ Route::post(
     '/domains/{id}/checks',
     function ($id) {
         try {
-            if (!DB::table('domains')->find($id)) {
-                throw new Exception("Id not exist");
-            }
-        } catch (Exception $e) {
-            abort_unless(false, 404, $e);
-        }
+            $domain = DB::table('domains')->where('id', $id)->first('name');
+            abort_unless($domain, 404);
+            $timestamp = now()->toDateTimeString();
+            $response = Http::get($domain->name);
+            $document = new Document($response->body());
 
-        $timestamp = now()->toDateTimeString();
-        $domain = DB::table('domains')->where('id', $id)->first('name');
-        $response = Http::get($domain->name);
-        $document = new Document($response->body());
+            $h1 = optional(
+                $document->first('h1::text'),
+                function ($unFormatH1) {
+                    return mb_strlen($unFormatH1) > 30 ? substr_replace($unFormatH1, '...', 30) : $unFormatH1;
+                }
+            );
 
-        $h1 = optional(
-            $document->first('h1::text'),
-            function ($unFormatH1) {
-                return mb_strlen($unFormatH1) > 30 ? substr_replace($unFormatH1, '...', 30) : $unFormatH1;
-            }
-        );
-
-        if ($document->has('meta[name=description]')) {
-            $unFormatDescription = $document->first('meta[name=description]')->first('meta::attr(content)');
-            $description = mb_strlen($unFormatDescription) > 30 ? substr_replace(
-                $unFormatDescription,
-                '...',
-                30
-            ) : $unFormatDescription;
-        }
-
-        $keywords = optional(
-            $document->first('meta[name=keywords]'),
-            function ($document) {
-                $unFormatKeywords = $document->first('meta::attr(content)');
-                return mb_strlen($unFormatKeywords) > 30 ? substr_replace(
-                    $unFormatKeywords,
+            if ($document->has('meta[name=description]')) {
+                $unFormatDescription = $document->first('meta[name=description]')->first('meta::attr(content)');
+                $description = mb_strlen($unFormatDescription) > 30 ? substr_replace(
+                    $unFormatDescription,
                     '...',
                     30
-                ) : $unFormatKeywords;
+                ) : $unFormatDescription;
             }
-        );
+
+            $keywords = optional(
+                $document->first('meta[name=keywords]'),
+                function ($document) {
+                    $unFormatKeywords = $document->first('meta::attr(content)');
+                    return mb_strlen($unFormatKeywords) > 30 ? substr_replace(
+                        $unFormatKeywords,
+                        '...',
+                        30
+                    ) : $unFormatKeywords;
+                }
+            );
 
 
-        DB::table('domain_checks')->insert(
-            [
-                'domain_id' => $id,
-                'status_code' => $response->status(),
-                'h1' => is_null($h1) ? '' : $h1,
-                'keywords' => is_null($keywords) ? '' : $keywords,
-                'description' => $description ?? '',
-                'created_at' => $timestamp,
-                'updated_at' => $timestamp,
-            ]
-        );
-        flash('Website has been checked!')->info();
+            DB::table('domain_checks')->insert(
+                [
+                    'domain_id' => $id,
+                    'status_code' => $response->status(),
+                    'h1' => is_null($h1) ? '' : $h1,
+                    'keywords' => is_null($keywords) ? '' : $keywords,
+                    'description' => $description ?? '',
+                    'created_at' => $timestamp,
+                    'updated_at' => $timestamp,
+                ]
+            );
+            flash('Website has been checked!')->info();
 
-        return redirect()->route('domains.show', ['id' => $id]);
+            return redirect()->route('domains.show', ['id' => $id]);
+        } catch (Exception $e) {
+            flash($e)->error();
+        }
     }
 )->name("domains.check");
