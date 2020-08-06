@@ -1,11 +1,13 @@
 <?php
 
 use Carbon\Carbon;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use DiDom\Document;
 
 /*
@@ -69,16 +71,7 @@ Route::get(
             ->distinct('domain_id')
             ->get(['domain_id', 'created_at', 'status_code']);
 
-        foreach ($domains as $domain) {
-            foreach ($checks as $check) {
-                if ($domain->id === $check->domain_id) {
-                    $domain->created_at = $check->created_at ?? '';
-                    $domain->status_code = $check->status_code ?? '';
-                }
-            }
-        }
-
-        return view('domains/index', ['domains' => $domains]);
+        return view('domains/index', ['domains' => $domains, 'checks' => $checks]);
     }
 )->name("domains");
 
@@ -97,58 +90,51 @@ Route::get(
 Route::post(
     '/domains/{id}/checks',
     function ($id) {
+        $domain = DB::table('domains')->where('id', $id)->first('name');
+        abort_unless($domain, 404);
+        $timestamp = now()->toDateTimeString();
         try {
-            $domain = DB::table('domains')->where('id', $id)->first('name');
-            abort_unless($domain, 404);
-            $timestamp = now()->toDateTimeString();
             $response = Http::get($domain->name);
-            $document = new Document($response->body());
-
-            $h1 = optional(
-                $document->first('h1::text'),
-                function ($unFormatH1) {
-                    return mb_strlen($unFormatH1) > 30 ? substr_replace($unFormatH1, '...', 30) : $unFormatH1;
-                }
-            );
-
-            if ($document->has('meta[name=description]')) {
-                $unFormatDescription = $document->first('meta[name=description]')->first('meta::attr(content)');
-                $description = mb_strlen($unFormatDescription) > 30 ? substr_replace(
-                    $unFormatDescription,
-                    '...',
-                    30
-                ) : $unFormatDescription;
-            }
-
-            $keywords = optional(
-                $document->first('meta[name=keywords]'),
-                function ($document) {
-                    $unFormatKeywords = $document->first('meta::attr(content)');
-                    return mb_strlen($unFormatKeywords) > 30 ? substr_replace(
-                        $unFormatKeywords,
-                        '...',
-                        30
-                    ) : $unFormatKeywords;
-                }
-            );
-
-
-            DB::table('domain_checks')->insert(
-                [
-                    'domain_id' => $id,
-                    'status_code' => $response->status(),
-                    'h1' => is_null($h1) ? '' : $h1,
-                    'keywords' => is_null($keywords) ? '' : $keywords,
-                    'description' => $description ?? '',
-                    'created_at' => $timestamp,
-                    'updated_at' => $timestamp,
-                ]
-            );
-            flash('Website has been checked!')->info();
-
-            return redirect()->route('domains.show', ['id' => $id]);
-        } catch (Exception $e) {
+        } catch (RequestException $e) {
             flash($e)->error();
         }
+
+        $document = new Document($response->body());
+
+        $h1 = optional(
+            $document->first('h1::text'),
+            function ($unFormatH1) {
+                return Str::limit($unFormatH1, 29, '...');
+            }
+        );
+
+        if ($document->has('meta[name=description]')) {
+            $unFormatDescription = $document->first('meta[name=description]')->first('meta::attr(content)');
+            $description = Str::limit($unFormatDescription, 30, '...');
+        }
+
+        $keywords = optional(
+            $document->first('meta[name=keywords]'),
+            function ($document) {
+                $unFormatKeywords = $document->first('meta::attr(content)');
+                return Str::limit($unFormatKeywords, 30, '...');
+            }
+        );
+
+
+        DB::table('domain_checks')->insert(
+            [
+                'domain_id' => $id,
+                'status_code' => $response->status(),
+                'h1' => is_null($h1) ? '' : $h1,
+                'keywords' => is_null($keywords) ? '' : $keywords,
+                'description' => $description ?? '',
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ]
+        );
+        flash('Website has been checked!')->info();
+
+        return redirect()->route('domains.show', ['id' => $id]);
     }
 )->name("domains.check");
