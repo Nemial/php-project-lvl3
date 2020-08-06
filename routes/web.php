@@ -92,48 +92,49 @@ Route::post(
     function ($id) {
         $domain = DB::table('domains')->where('id', $id)->first('name');
         abort_unless($domain, 404);
-        $timestamp = now()->toDateTimeString();
+
         try {
             $response = Http::get($domain->name);
+            $document = new Document($response->body());
+            $timestamp = now()->toDateTimeString();
+
+            $h1 = optional(
+                $document->first('h1::text'),
+                function ($unFormatH1) {
+                    return Str::limit($unFormatH1, 29, '...');
+                }
+            );
+
+            if ($document->has('meta[name=description]')) {
+                $unFormatDescription = $document->first('meta[name=description]')->first('meta::attr(content)');
+                $description = Str::limit($unFormatDescription, 30, '...');
+            }
+
+            $keywords = optional(
+                $document->first('meta[name=keywords]'),
+                function ($document) {
+                    $unFormatKeywords = $document->first('meta::attr(content)');
+                    return Str::limit($unFormatKeywords, 30, '...');
+                }
+            );
+
+
+            DB::table('domain_checks')->insert(
+                [
+                    'domain_id' => $id,
+                    'status_code' => $response->status(),
+                    'h1' => is_null($h1) ? '' : $h1,
+                    'keywords' => is_null($keywords) ? '' : $keywords,
+                    'description' => $description ?? '',
+                    'created_at' => $timestamp,
+                    'updated_at' => $timestamp,
+                ]
+            );
+            flash('Website has been checked!')->info();
         } catch (RequestException $e) {
             flash($e)->error();
         }
 
-        $document = new Document($response->body());
-
-        $h1 = optional(
-            $document->first('h1::text'),
-            function ($unFormatH1) {
-                return Str::limit($unFormatH1, 29, '...');
-            }
-        );
-
-        if ($document->has('meta[name=description]')) {
-            $unFormatDescription = $document->first('meta[name=description]')->first('meta::attr(content)');
-            $description = Str::limit($unFormatDescription, 30, '...');
-        }
-
-        $keywords = optional(
-            $document->first('meta[name=keywords]'),
-            function ($document) {
-                $unFormatKeywords = $document->first('meta::attr(content)');
-                return Str::limit($unFormatKeywords, 30, '...');
-            }
-        );
-
-
-        DB::table('domain_checks')->insert(
-            [
-                'domain_id' => $id,
-                'status_code' => $response->status(),
-                'h1' => is_null($h1) ? '' : $h1,
-                'keywords' => is_null($keywords) ? '' : $keywords,
-                'description' => $description ?? '',
-                'created_at' => $timestamp,
-                'updated_at' => $timestamp,
-            ]
-        );
-        flash('Website has been checked!')->info();
 
         return redirect()->route('domains.show', ['id' => $id]);
     }
