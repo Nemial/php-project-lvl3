@@ -1,6 +1,7 @@
 <?php
 
 use Carbon\Carbon;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
@@ -92,11 +93,11 @@ Route::post(
     function ($id) {
         $domain = DB::table('domains')->where('id', $id)->first('name');
         abort_unless($domain, 404);
+        $timestamp = now()->toDateTimeString();
 
         try {
             $response = Http::get($domain->name);
             $document = new Document($response->body());
-            $timestamp = now()->toDateTimeString();
 
             $h1 = optional(
                 $document->first('h1::text'),
@@ -133,6 +134,18 @@ Route::post(
             flash('Website has been checked!')->info();
         } catch (RequestException $e) {
             flash($e)->error();
+        } catch (ConnectionException $e) {
+            DB::table('domain_checks')->insert(
+                [
+                    'domain_id' => $id,
+                    'status_code' => 404,
+                    'h1' => '',
+                    'keywords' => '',
+                    'description' => '',
+                    'created_at' => $timestamp,
+                    'updated_at' => $timestamp,
+                ]
+            );
         }
 
 
