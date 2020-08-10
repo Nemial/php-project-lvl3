@@ -68,10 +68,11 @@ Route::get(
     function () {
         $domains = DB::table('domains')->get(['id', 'name']);
         $checks = DB::table('domain_checks')
+            ->select(DB::raw('DISTINCT ON ("domain_id") domain_id, created_at, status_code'))
             ->orderBy('domain_id')
             ->orderBy('created_at', 'desc')
             ->distinct('domain_id')
-            ->get(['domain_id', 'created_at', 'status_code'])->keyBy('domain_id')->toArray();
+            ->get()->keyBy('domain_id')->toArray();
         return view('domains/index', ['domains' => $domains, 'checks' => $checks]);
     }
 )->name("domains");
