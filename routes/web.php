@@ -135,18 +135,6 @@ Route::post(
             flash('Website has been checked!')->info();
         } catch (RequestException $e) {
             flash('Failed to connect to the website')->error();
-        } catch (ConnectionException $e) {
-            DB::table('domain_checks')->insert(
-                [
-                    'domain_id' => $id,
-                    'status_code' => 404,
-                    'h1' => '',
-                    'keywords' => '',
-                    'description' => '',
-                    'created_at' => $timestamp,
-                    'updated_at' => $timestamp,
-                ]
-            );
         }
 
 
