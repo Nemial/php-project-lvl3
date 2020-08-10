@@ -71,9 +71,8 @@ Route::get(
             ->orderBy('domain_id')
             ->orderBy('created_at', 'desc')
             ->distinct('domain_id')
-            ->get(['domain_id', 'created_at', 'status_code']);
-        $dataChecks = collect($checks->all())->keyBy('domain_id')->toArray();
-        return view('domains/index', ['domains' => $domains, 'checks' => $dataChecks]);
+            ->get(['domain_id', 'created_at', 'status_code'])->keyBy('domain_id')->toArray();
+        return view('domains/index', ['domains' => $domains, 'checks' => $checks]);
     }
 )->name("domains");
 
