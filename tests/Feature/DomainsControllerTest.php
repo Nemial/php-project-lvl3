@@ -54,7 +54,7 @@ class DomainsControllerTest extends TestCase
     public function testDomainsIndex()
     {
         $response = $this->get(route("domains"));
-        $response->assertOk();
+        $response->assertSessionHasNoErrors();
     }
 
     public function testDomainsShow()
