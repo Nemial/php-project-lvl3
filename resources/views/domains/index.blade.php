@@ -19,12 +19,8 @@
                         <td>
                             <a href="{{ route('domains.show', ['id' => $domain->id]) }}">{{ $domain->name }}</a>
                         </td>
-                        @foreach($checks as $check)
-                            @if($domain->id === $check->domain_id)
-                                <td>{{ $check->created_at }}</td>
-                                <td>{{ $check->status_code }}</td>
-                            @endif
-                        @endforeach
+                                <td>{{ $checks[$domain->id]->created_at ?? '' }}</td>
+                                <td>{{ $checks[$domain->id]->status_code ?? '' }}</td>
                     </tr>
                 @endforeach
             </table>

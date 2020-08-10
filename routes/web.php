@@ -67,12 +67,13 @@ Route::get(
     '/domains',
     function () {
         $domains = DB::table('domains')->get(['id', 'name']);
-        $checks = DB::table('domain_checks')->orderBy('domain_id')
+        $checks = DB::table('domain_checks')
+            ->orderBy('domain_id')
             ->orderBy('created_at', 'desc')
             ->distinct('domain_id')
             ->get(['domain_id', 'created_at', 'status_code']);
-
-        return view('domains/index', ['domains' => $domains, 'checks' => $checks]);
+        $dataChecks = collect($checks->all())->keyBy('domain_id')->toArray();
+        return view('domains/index', ['domains' => $domains, 'checks' => $dataChecks]);
     }
 )->name("domains");
 
@@ -133,7 +134,7 @@ Route::post(
             );
             flash('Website has been checked!')->info();
         } catch (RequestException $e) {
-            flash($e)->error();
+            flash('Failed to connect to the website')->error();
         } catch (ConnectionException $e) {
             DB::table('domain_checks')->insert(
                 [
